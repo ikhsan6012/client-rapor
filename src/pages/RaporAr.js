@@ -146,10 +146,10 @@ const RaporAr = () => {
       }
       <div className="table-responsive" style={{ maxHeight: 700 }}>
         <table className="table table-striped" style={{ fontSize: 10 }}>
+          <Thead />
           <tbody>
             { renderData(data) }
           </tbody>
-          <Thead />
         </table>
       </div>
 		</Fragment>
