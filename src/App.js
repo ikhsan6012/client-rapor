@@ -9,13 +9,11 @@ import Loading from './components/Loading'
 const Home = lazy(() => import('./pages/Home'))
 const RaporAr = lazy(() => import('./pages/RaporAr'))
 
-console.log(process.env)
-
 const App = () =>
 	<Router>
+		<Logo />
+		<Nav />
 		<div className="container">
-			<Logo />
-			<Nav />
 			<Suspense fallback={ <Loading /> }>
 				<Switch>
 					<Route exact path="/" component={ Home } />

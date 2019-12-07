@@ -1,8 +1,11 @@
 import React, { Fragment, useState, useEffect } from 'react'
 
 const RaporAr = () => {
-  const [data, setData] = useState({})
-  const [lastUpdate, setLastUpdate] = useState(null)
+	const [data, setData] = useState({})
+	const [data2, setData2] = useState(null)
+	const [lastUpdate, setLastUpdate] = useState(null)
+	const [kd_kpp, setKdKpp] = useState(null)
+	const [method, setMethod] = useState('boxplot')
   
 	const getData = async q => {
 		const res = await fetch(process.env.REACT_APP_API_URL + 'data/rapor', {
@@ -12,7 +15,8 @@ const RaporAr = () => {
 		})
 		const data = await res.json()
     setData(data.data)
-    setLastUpdate(data.lastUpdate)
+		setLastUpdate(data.lastUpdate)
+		setKdKpp(data.kd_kpp)
 	}
 
 	useEffect(() => {
@@ -24,6 +28,26 @@ const RaporAr = () => {
 			num = parseFloat(num.toFixed(2))
 		}
 		return num.toLocaleString('ID', { useGrouping: true })
+	}
+
+	const handleKppClick = e => {
+		e.preventDefault()
+		setData2(data)
+		getData({ KD_KPP: e.target.dataset.id })
+		setMethod('boxplot')
+	}
+
+	const handleBackClick = e => {
+		setData(data2)
+		setData2(null)
+		setKdKpp(null)
+		setMethod('boxplot')
+	}
+
+	const handleMethodClick = () => {
+		getData({ KD_KPP: kd_kpp, method })
+		if(!method) setMethod('boxplot')
+		else setMethod(null)
 	}
 
 	const renderData = data => {
@@ -39,7 +63,14 @@ const RaporAr = () => {
 				return(<tr key={ i }>
 					<td className="align-middle text-center">{ data[ar].RANKING }</td>
 					<td className="align-middle">{ data[ar].NAMA_AR }</td>
-					<td className="align-middle" data-id={ data[ar].KPP.KD_KANTOR } onClick={ handleKppClick }>{ data[ar].KPP.NM_KANTOR }</td>
+					<td className="align-middle">
+						{ kd_kpp
+							? data[ar].KPP.NM_KANTOR
+							: <a href="/rapor-ar" data-id={ data[ar].KPP.KD_KANTOR } onClick={ handleKppClick }>
+									{ data[ar].KPP.NM_KANTOR }
+								</a>
+						}
+					</td>
 					<td className="align-middle text-right">{ formatNumber(data[ar].TOTAL_SKOR_AKHIR) }</td>
 					<td className="align-middle text-right">{ formatNumber(data[ar].SP2DK.JUMLAH) }</td>
 					<td className="align-middle text-right">{ formatNumber(data[ar].SP2DK.SKOR) }</td>
@@ -75,10 +106,6 @@ const RaporAr = () => {
 			})
 		: <tr><td colSpan="34">Sedang Mengambil Data...</td></tr>
 		return dataRender
-	}
-
-	const handleKppClick = e => {
-		getData({ KD_KPP: e.target.dataset.id })
 	}
 
 	const Thead = props =>
@@ -140,11 +167,19 @@ const RaporAr = () => {
 	return(
 		<Fragment>
       <h2>Rapor AR</h2>
-      { lastUpdate
-        ? <p className="float-right">Update Tanggal: { new Date(lastUpdate).toLocaleDateString('ID') }</p>
-        : null
-      }
-      <div className="table-responsive" style={{ maxHeight: 700 }}>
+			<hr/>
+			{ kd_kpp
+				? <button className="btn btn-primary float-left mr-2" onClick={ handleBackClick }>Kembali</button>
+				: null
+			}
+			<button className="btn btn-success mb-2" onClick={ handleMethodClick }>
+				Metode { !method ? 'Standar' : 'Boxplot' }
+			</button>
+			{ lastUpdate
+				? <p className="float-right">Update Tanggal: { new Date(lastUpdate).toLocaleDateString() }</p>
+				: null
+			}
+      <div className="table-responsive" style={{ maxHeight: 650 }}>
         <table className="table table-striped" style={{ fontSize: 10 }}>
           <Thead />
           <tbody>
